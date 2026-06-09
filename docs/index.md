@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "车路知识库"
   text: "这是一个小标题"
-  tagline: "A14"
+  tagline: "A14X"
   actions:
     - theme: brand
       text: 自动驾驶入门

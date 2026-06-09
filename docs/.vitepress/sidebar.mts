@@ -78,6 +78,7 @@ export default [
                     link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合',
                     collapsed: true,
                     items: [
+                      { text: '6.AGeneralPipeline', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合/6.AGeneralPipeline' },
                       { text: '1.Frustum-PointNets', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合/1.Frustum-PointNets' },
                       { text: '2.Frustum-PointPillars', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合/2.Frustum-PointPillars' },
                       { text: '3.Complexer-YOLO', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合/3.Complexer-YOLO' },
@@ -116,7 +117,6 @@ export default [
                     collapsed: true,
                     items: [
                       { text: 'CLOCs', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.3后期融合/CLOCs' },
-                      { text: 'CLOCs', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.3后期融合/CLOCs' },
                       { text: 'Fast-CLOCs', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.3后期融合/Fast-CLOCs' },
                     ],
                   },
@@ -128,6 +128,7 @@ export default [
                 link: '/kb/自动驾驶入门/3.三维检测经典文献/3.7.Graphfor3DOD',
                 collapsed: true,
                 items: [
+                  { text: '时间脉络梳理', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.7.Graphfor3DOD/时间脉络梳理' },
                   { text: '方法调研表格', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.7.Graphfor3DOD/方法调研表格' },
                   { text: '时间脉络梳理', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.7.Graphfor3DOD/时间脉络梳理' },
                 ],
@@ -290,7 +291,6 @@ export default [
             link: '/kb/自动驾驶入门/一些报错',
             collapsed: true,
             items: [
-              { text: 'Spconv1.2在30系显卡上的问题', link: '/kb/自动驾驶入门/一些报错/Spconv1.2在30系显卡上的问题' },
               { text: 'cannotimportname\'CUDAEvent\'from\'cumm.core_cc.tensorview_bind\'(unknownlocation)', link: '/kb/自动驾驶入门/一些报错/cannotimportname\'CUDAEvent\'from\'cumm.core_cc.tensorview_bind\'(unknownlocation)' },
               { text: '编译后还出现nomodulenamed\'pcdet\'', link: '/kb/自动驾驶入门/一些报错/编译后还出现nomodulenamed\'pcdet\'' },
               { text: '安装torch_scatter报错 ATen_OpMathType.h：No such file or director', link: '/kb/自动驾驶入门/一些报错/安装torch_scatter报错ATen_OpMathType.h：Nosuchfileordirector' },
@@ -350,7 +350,6 @@ export default [
         link: '/kb/现有工作',
         collapsed: true,
         items: [
-          { text: 'MIT-BevfusionNus实验结果', link: '/kb/现有工作/MIT-BevfusionNus实验结果' },
           {
             text: 'MambaAD？相关实验与报告',
             link: '/kb/现有工作/MambaAD？相关实验与报告',
@@ -377,7 +376,6 @@ export default [
             link: '/kb/现有工作/SparseDrive相关实验',
             collapsed: true,
             items: [
-              { text: 'MomAD(SparseDrive)', link: '/kb/现有工作/SparseDrive相关实验/MomAD(SparseDrive)' },
               { text: 'MomAD(SparseDrive)闭环', link: '/kb/现有工作/SparseDrive相关实验/MomAD(SparseDrive)闭环' },
               { text: 'MomAD(VAD)闭环', link: '/kb/现有工作/SparseDrive相关实验/MomAD(VAD)闭环' },
               { text: 'MomAD(SparseDrive)', link: '/kb/现有工作/SparseDrive相关实验/MomAD(SparseDrive)' },
@@ -551,7 +549,6 @@ export default [
         link: '/kb/二维入门相关',
         collapsed: true,
         items: [
-          { text: '4.单阶多层检测器：SSD', link: '/kb/二维入门相关/4.单阶多层检测器：SSD' },
           {
             text: 'DETR系列',
             collapsed: true,
@@ -621,6 +618,7 @@ export default [
             link: '/kb/二维入门相关/7.物体检测细节处理',
             collapsed: true,
             items: [
+              { text: '7.2样本不均衡问题', link: '/kb/二维入门相关/7.物体检测细节处理/7.2样本不均衡问题' },
               { text: '7.1NMS 非极大值抑制', link: '/kb/二维入门相关/7.物体检测细节处理/7.1NMS非极大值抑制' },
               { text: '7.2样本不均衡问题', link: '/kb/二维入门相关/7.物体检测细节处理/7.2样本不均衡问题' },
               { text: '7.3模型过拟合', link: '/kb/二维入门相关/7.物体检测细节处理/7.3模型过拟合' },

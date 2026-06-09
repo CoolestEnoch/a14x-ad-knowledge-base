@@ -4,34 +4,125 @@ import path from 'node:path'
 import sidebar from './sidebar.mts'
 
 function loadKbChatConfig() {
-  const configPath = path.resolve(process.cwd(), 'kb-chat.config.json')
-  return JSON.parse(fs.readFileSync(configPath, 'utf8'))
+  try {
+    const configPath = path.resolve(process.cwd(), 'kb-chat.config.json')
+    return JSON.parse(fs.readFileSync(configPath, 'utf8'))
+  } catch (error) {
+    throw new Error(`failed to load kb-chat.config.json: ${String((error as Error)?.message || error)}`)
+  }
 }
 
-function copypartyPublicUrl(config: any) {
-  const host = String(config?.copyparty?.host || '').trim()
-  const port = Number(config?.copyparty?.port)
+function requiredPort(value: unknown, name: string) {
+  const port = Number(value)
 
-  if (config?.copyparty?.publicUrl) return String(config.copyparty.publicUrl)
-  if (!host || !Number.isInteger(port) || port <= 0 || port > 65535) {
-    throw new Error('invalid config: copyparty.host/copyparty.port')
+  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
+    throw new Error(`invalid config port: ${name}`)
   }
 
-  return `http://${host}:${port}`
+  return port
+}
+
+function requiredString(value: unknown, name: string) {
+  const text = String(value ?? '').trim()
+
+  if (!text) throw new Error(`missing config: ${name}`)
+  return text
 }
 
 const kbChatConfig = loadKbChatConfig()
-const copypartyUrl = copypartyPublicUrl(kbChatConfig)
+const kbChatHost = requiredString(kbChatConfig?.chatServer?.host, 'chatServer.host')
+const kbChatProxyHost = requiredString(kbChatConfig?.chatServer?.proxyHost || kbChatHost, 'chatServer.proxyHost')
+const kbChatPort = requiredPort(kbChatConfig?.chatServer?.port, 'chatServer.port')
+const vitepressHost = requiredString(kbChatConfig?.vitepress?.host, 'vitepress.host')
+const vitepressPort = requiredPort(kbChatConfig?.vitepress?.port, 'vitepress.port')
+const copypartyPort = requiredPort(kbChatConfig?.copyparty?.port, 'copyparty.port')
+const copypartyPublicUrl = String(kbChatConfig?.copyparty?.publicUrl || `http://${kbChatConfig?.copyparty?.host}:${copypartyPort}`)
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "车路知识库",
   description: "车路知识库",
+  // 客户端 MathJax 渲染数学公式（服务端不渲染 SVG，避免大文件崩溃）
+  head: [
+    ['script', {}, `MathJax={tex:{inlineMath:[['$','$'],['\\\\(','\\\\)']],displayMath:[['$$','$$'],['\\\\[','\\\\]']]},options:{ignoreHtmlClass:'no-mathjax',processHtmlClass:'math'},startup:{ready(){MathJax.startup.defaultReady();}}}`],
+    ['script', { id: 'MathJax-script', src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js', async: true }],
+  ],
   markdown: {
-    math: true,
+    // 数学公式不在服务端渲染 SVG，改为客户端 MathJax 渲染。
+    config: (md) => {
+      md.inline.ruler.after('escape', 'math_inline', (state, silent) => {
+        if (state.src[state.pos] !== '$') return false;
+        if (state.src[state.pos + 1] === ' ' || state.src[state.pos + 1] === '\t') return false;
+        let end = state.src.indexOf('$', state.pos + 1);
+        if (end === -1) return false;
+        if (!silent) {
+          const token = state.push('math_inline', '', 0);
+          token.content = state.src.slice(state.pos + 1, end);
+          token.markup = '$';
+        }
+        state.pos = end + 1;
+        return true;
+      });
+      md.renderer.rules.math_inline = (tokens, idx) =>
+        `<span class="math inline">\\(${tokens[idx].content}\\)</span>`;
+
+      md.block.ruler.after('blockquote', 'math_block', (state, startLine, endLine, silent) => {
+        let pos = state.bMarks[startLine] + state.tShift[startLine];
+        let max = state.eMarks[startLine];
+        if (pos >= max) return false;
+        const line = state.src.slice(pos, max);
+        if (!line.startsWith('$$') && line !== '$') return false;
+        const marker = line.startsWith('$$') ? '$$' : '$';
+        if (marker === '$$') {
+          const close = line.indexOf('$$', 2);
+          if (close !== -1) {
+            if (!silent) {
+              const token = state.push('math_block', '', 0);
+              token.content = line.slice(2, close);
+              token.markup = '$$';
+              token.block = true;
+            }
+            state.line = startLine + 1;
+            return true;
+          }
+        }
+        let nextLine = startLine + 1;
+        let content = marker === '$$' ? line.slice(2) : '';
+        for (; nextLine < endLine; nextLine++) {
+          const lpos = state.bMarks[nextLine] + state.tShift[nextLine];
+          const lmax = state.eMarks[nextLine];
+          const cur = state.src.slice(lpos, lmax);
+          if (cur.trim() === marker) {
+            if (!silent) {
+              const token = state.push('math_block', '', 0);
+              token.content = content.trim();
+              token.markup = marker;
+              token.block = true;
+            }
+            state.line = nextLine + 1;
+            return true;
+          }
+          content += (content ? '\n' : '') + cur;
+        }
+        return false;
+      });
+      md.renderer.rules.math_block = (tokens, idx) =>
+        `<div class="math display">\\[${tokens[idx].content}\\]</div>`;
+    },
+  },
+  vite: {
+    server: {
+      host: vitepressHost,
+      port: vitepressPort,
+      proxy: {
+        '/api': {
+          target: `http://${kbChatProxyHost}:${kbChatPort}`,
+          changeOrigin: true,
+        },
+      },
+    },
   },
   themeConfig: {
-
     search: {
       provider: 'local'
     },
@@ -39,15 +130,13 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: '编辑', link: copypartyUrl },
-      { text: 'A14X Blog', link: 'https://go.microsoft.com/fwlink/?LinkId=872991' }
+      { text: '编辑', link: copypartyPublicUrl }
     ],
 
     sidebar,
 
     socialLinks: [
-      { icon: 'mtr', link: copypartyUrl },
-      { icon: 'twitter', link: 'https://x.com/realdonaldtrump' },
+      { icon: 'mtr', link: copypartyPublicUrl },
     ]
   }
 })
