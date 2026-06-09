@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output (VitePress)
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Dev artifacts
+.cache/
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE & editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+kb-chat.config.json
+kb-chat.providers.json
+
+# OS
+*.log
+
+
+# Other
+test.sh
+docs/kb/**
+docs/.vitepress/config.mts

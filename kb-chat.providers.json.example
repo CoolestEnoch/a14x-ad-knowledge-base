@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "type": "coolauxv-base64",
+      "label": "test",
+      "value": "base64_here"
+    },
+    {
+      "type": "ollama-subscription",
+      "label": "OllamaSpider speeds",
+      "url": "https://example.com/your_ollama_subscription.json"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+/* 防止无空格长字符串（URL、报错名、长英文标识符等）捅穿页面 */
+.vp-doc,
+.vp-doc p,
+.vp-doc li,
+.vp-doc blockquote,
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.vp-doc h4,
+.vp-doc h5,
+.vp-doc h6,
+.vp-doc a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.vp-doc {
+  min-width: 0;
+}
+
+.vp-doc img,
+.vp-doc video {
+  max-width: 100%;
+}
+
+.vp-doc table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.vp-doc pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.VPSidebar,
+.VPSidebarItem,
+.VPSidebarItem .item,
+.VPSidebarItem .text,
+.VPSidebarItem .link {
+  min-width: 0;
+}
+
+.VPSidebarItem .text {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

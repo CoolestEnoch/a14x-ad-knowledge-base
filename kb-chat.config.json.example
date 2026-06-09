@@ -1,0 +1,48 @@
+{
+  "chatServer": {
+    "host": "0.0.0.0",
+    "proxyHost": "127.0.0.1",
+    "port": 1145
+  },
+  "vitepress": {
+    "host": "0.0.0.0",
+    "port": 1919
+  },
+  "copyparty": {
+    "host": "0.0.0.0",
+    "port": 10810,
+    "publicUrl": "http://127.0.0.1:10810",
+    "user": "",
+    "pass": ""
+  },
+  "kb": {
+    "dir": "docs/kb",
+    "refreshMs": 30000,
+    "useInotify": true
+  },
+  "rag": {
+    "topK": 6,
+    "chunkSize": 1600,
+    "chunkOverlap": 200
+  },
+  "indexCache": {
+    "enabled": true,
+    "file": ".cache/kb-chat-index.json"
+  },
+  "providersFile": "kb-chat.providers.json",
+  "providerPool": {
+    "enabled": true,
+    "cacheFile": ".cache/provider-pool.json",
+    "timeoutMs": 120000,
+    "retryLimit": 6
+  },
+  "ollama": {
+    "subscriptionRefreshTime": "04:00",
+    "tagsTimeoutMs": 3000,
+    "healthBatchSize": 12,
+    "healthLimit": 60,
+    "chatRetryLimit": 8,
+    "chatTimeoutMs": 120000,
+    "defaultModel": ""
+  }
+}

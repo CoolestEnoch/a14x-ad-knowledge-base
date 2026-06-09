@@ -1,0 +1,53 @@
+import { defineConfig } from 'vitepress'
+import fs from 'node:fs'
+import path from 'node:path'
+import sidebar from './sidebar.mts'
+
+function loadKbChatConfig() {
+  const configPath = path.resolve(process.cwd(), 'kb-chat.config.json')
+  return JSON.parse(fs.readFileSync(configPath, 'utf8'))
+}
+
+function copypartyPublicUrl(config: any) {
+  const host = String(config?.copyparty?.host || '').trim()
+  const port = Number(config?.copyparty?.port)
+
+  if (config?.copyparty?.publicUrl) return String(config.copyparty.publicUrl)
+  if (!host || !Number.isInteger(port) || port <= 0 || port > 65535) {
+    throw new Error('invalid config: copyparty.host/copyparty.port')
+  }
+
+  return `http://${host}:${port}`
+}
+
+const kbChatConfig = loadKbChatConfig()
+const copypartyUrl = copypartyPublicUrl(kbChatConfig)
+
+// https://vitepress.dev/reference/site-config
+export default defineConfig({
+  title: "车路知识库",
+  description: "车路知识库",
+  markdown: {
+    math: true,
+  },
+  themeConfig: {
+
+    search: {
+      provider: 'local'
+    },
+
+    // https://vitepress.dev/reference/default-theme-config
+    nav: [
+      { text: 'Home', link: '/' },
+      { text: '编辑', link: copypartyUrl },
+      { text: 'A14X Blog', link: 'https://go.microsoft.com/fwlink/?LinkId=872991' }
+    ],
+
+    sidebar,
+
+    socialLinks: [
+      { icon: 'mtr', link: copypartyUrl },
+      { icon: 'twitter', link: 'https://x.com/realdonaldtrump' },
+    ]
+  }
+})
