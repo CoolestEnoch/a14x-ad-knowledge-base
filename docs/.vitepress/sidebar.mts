@@ -78,7 +78,6 @@ export default [
                     link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合',
                     collapsed: true,
                     items: [
-                      { text: '6.AGeneralPipeline', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合/6.AGeneralPipeline' },
                       { text: '1.Frustum-PointNets', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合/1.Frustum-PointNets' },
                       { text: '2.Frustum-PointPillars', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合/2.Frustum-PointPillars' },
                       { text: '3.Complexer-YOLO', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.5图像和点云融合（入门必读）/3.5.1前期融合/3.Complexer-YOLO' },
@@ -128,7 +127,6 @@ export default [
                 link: '/kb/自动驾驶入门/3.三维检测经典文献/3.7.Graphfor3DOD',
                 collapsed: true,
                 items: [
-                  { text: '时间脉络梳理', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.7.Graphfor3DOD/时间脉络梳理' },
                   { text: '方法调研表格', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.7.Graphfor3DOD/方法调研表格' },
                   { text: '时间脉络梳理', link: '/kb/自动驾驶入门/3.三维检测经典文献/3.7.Graphfor3DOD/时间脉络梳理' },
                 ],
@@ -618,7 +616,6 @@ export default [
             link: '/kb/二维入门相关/7.物体检测细节处理',
             collapsed: true,
             items: [
-              { text: '7.2样本不均衡问题', link: '/kb/二维入门相关/7.物体检测细节处理/7.2样本不均衡问题' },
               { text: '7.1NMS 非极大值抑制', link: '/kb/二维入门相关/7.物体检测细节处理/7.1NMS非极大值抑制' },
               { text: '7.2样本不均衡问题', link: '/kb/二维入门相关/7.物体检测细节处理/7.2样本不均衡问题' },
               { text: '7.3模型过拟合', link: '/kb/二维入门相关/7.物体检测细节处理/7.3模型过拟合' },

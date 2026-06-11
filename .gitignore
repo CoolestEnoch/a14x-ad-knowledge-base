@@ -24,6 +24,7 @@ Thumbs.db
 .env.*.local
 kb-chat.config.json
 kb-chat.providers.json
+prompts.md
 
 # OS
 *.log

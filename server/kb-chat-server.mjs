@@ -13,6 +13,7 @@ app.use(express.json({ limit: '2mb' }));
 
 const ROOT_DIR = process.cwd();
 const CHAT_CONFIG_FILE = path.resolve(ROOT_DIR, 'kb-chat.config.json');
+const PROMPTS_FILE = path.resolve(ROOT_DIR, 'prompts.md');
 
 function loadJsonFile(file, label) {
   try {
@@ -227,6 +228,22 @@ const KB_DIR_CACHE_KEY = path.relative(ROOT_DIR, KB_DIR).split(path.sep).join('/
 const USE_KB_INDEX_CACHE = configFlag(INDEX_CACHE_CONFIG.enabled, '1');
 const USE_KB_INOTIFY = configFlag(KB_CONFIG.useInotify, '1');
 const KB_INDEX_CACHE_VERSION = 2;
+
+const DEFAULT_SYSTEM_PROMPT = `
+你是实验室知识库助手。你必须优先依据给定的 Markdown 知识库片段回答。
+如果知识库片段不足以回答，就明确说明“知识库里没有找到足够依据”，然后再给出一般性建议。
+回答要使用中文，尽量直接、具体。
+不要在正文末尾列出“参考来源”，系统会在前端单独显示来源文件。
+不要编造不存在的文件、结论或实验结果。
+`.trim();
+
+const KB_SYSTEM_RULES = `
+你必须优先依据给定的 Markdown 知识库片段回答。
+如果知识库片段不足以回答，就明确说明“知识库里没有找到足够依据”，然后再给出一般性建议。
+回答要使用中文，尽量直接、具体。
+不要在正文末尾列出“参考来源”，系统会在前端单独显示来源文件。
+不要编造不存在的文件、结论或实验结果。
+`.trim();
 
 let kbChunks = [];
 let lastKbIndexAt = null;
@@ -2092,13 +2109,10 @@ function buildPromptMessages(userMessage, history, contexts) {
     ].join('\n');
   }).join('\n\n---\n\n');
 
-  const system = `
-你是实验室知识库助手。你必须优先依据给定的 Markdown 知识库片段回答。
-如果知识库片段不足以回答，就明确说明“知识库里没有找到足够依据”，然后再给出一般性建议。
-回答要使用中文，尽量直接、具体。
-不要在正文末尾列出“参考来源”，系统会在前端单独显示来源文件。
-不要编造不存在的文件、结论或实验结果。
-`.trim();
+  const customPrompt = readCustomPrompt();
+  const system = customPrompt
+    ? [customPrompt, KB_SYSTEM_RULES].join('\n\n')
+    : DEFAULT_SYSTEM_PROMPT;
 
   const ragMessage = `
 下面是从知识库中检索到的相关片段：
@@ -2109,17 +2123,44 @@ ${contextText || '没有检索到相关片段。'}
 ${userMessage}
 `.trim();
 
-  const safeHistory = Array.isArray(history)
-    ? history
-        .filter((m) => m && ['user', 'assistant'].includes(m.role) && typeof m.content === 'string')
-        .slice(-8)
-    : [];
+  const safeHistory = normalizeChatHistory(history, userMessage);
 
   return [
     { role: 'system', content: system },
     ...safeHistory,
     { role: 'user', content: ragMessage },
   ];
+}
+
+function normalizeChatHistory(history, currentUserMessage) {
+  const safeHistory = Array.isArray(history)
+    ? history
+        .filter((m) => m && ['user', 'assistant'].includes(m.role) && typeof m.content === 'string')
+        .map((m) => ({
+          role: m.role,
+          content: m.content,
+        }))
+    : [];
+  const last = safeHistory[safeHistory.length - 1];
+
+  if (last?.role === 'user' && last.content.trim() === String(currentUserMessage || '').trim()) {
+    safeHistory.pop();
+  }
+
+  return safeHistory;
+}
+
+function readCustomPrompt() {
+  try {
+    const text = fsSync.readFileSync(PROMPTS_FILE, 'utf8').trim();
+    return text || '';
+  } catch (err) {
+    if (err?.code !== 'ENOENT') {
+      console.warn(`[Prompts] failed to load ${PROMPTS_FILE}: ${String(err?.message || err)}`);
+    }
+
+    return '';
+  }
 }
 
 async function requestOllamaChat(endpoint, model, messages) {

@@ -270,7 +270,6 @@ async function sendMessage() {
   try {
     const history = messages.value
       .filter((m) => m.role === 'user' || m.role === 'assistant')
-      .slice(-8)
       .map((m) => ({
         role: m.role,
         content: m.content,
