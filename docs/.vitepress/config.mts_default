@@ -47,7 +47,7 @@ export default defineConfig({
   title: "车路知识库",
   description: "车路知识库",
   #base: siteBase,
-  base: '/ai4x-abkb/',
+  base: '/a14x-ad-knowledge-base/',
   ignoreDeadLinks: true,
   // 客户端 MathJax 渲染数学公式（服务端不渲染 SVG，避免大文件崩溃）
   head: [
