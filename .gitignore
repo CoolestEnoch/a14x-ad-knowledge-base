@@ -34,5 +34,5 @@ prompts.md
 
 # Other
 test.sh
-docs/kb/**
-docs/.vitepress/config.mts
+# docs/kb/**
+# docs/.vitepress/config.mts
