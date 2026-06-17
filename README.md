@@ -75,6 +75,68 @@ bash run.sh
 
 打开浏览器访问 `http://localhost:1919` 即可看到知识库首页，**右下角就是 AI 对话入口**。
 
+### AI 对话请求链路
+
+聊天组件现在只请求同源后端 API：
+
+```bash
+bash run.sh
+```
+
+请求链路：
+
+```
+浏览器 ChatWidget
+  -> /api/status 或 /api/chat
+  -> VitePress dev proxy
+  -> kb-chat-server
+  -> 订阅/Provider/Ollama 端点
+```
+
+这样浏览器不会直接请求模型端点，也不会受模型端点 CORS 限制。`run.sh` 会同时启动：
+
+- VitePress 文档站
+- KB Chat Server
+- Copyparty 文件服务
+
+### 上传者贡献统计
+
+贡献统计不按 Git commit 或 Linux 文件 owner/group 计算。`run.sh` 启动 Copyparty 时会挂载上传完成 hook，把每次上传的 Copyparty 账号写入 Markdown 头部的 `uploader` 字段；构建统计页时优先读取这个字段。上传前的 Markdown 可以保持没有账号信息，上传完成后由 hook 自动补上。
+
+要按人区分上传量，需要让每个人使用不同的 Copyparty 账号。可以在 `kb-chat.config.json` 里配置：
+
+```json
+{
+  "copyparty": {
+    "accounts": [
+      { "user": "alice", "pass": "change-me" },
+      { "user": "bob", "pass": "change-me" }
+    ]
+  }
+}
+```
+
+构建脚本会按以下优先级识别上传者：
+
+1. Markdown frontmatter：`uploader`、`uploadedBy`、`contributor`、`maintainer`、`owner`
+2. `.cache/copyparty-uploaders.json`
+3. `docs/kb/.uploaders.json`
+4. `docs/uploaders.json`
+5. `contributors.config.json`
+
+上传者清单格式可参考 `docs/uploaders.example.json`。历史文件如果没有 hook 记录或显式清单，会归到 `Unknown`。
+
+### GitHub Pages 部署
+
+仓库已包含 `.github/workflows/deploy-pages.yml`。推送到 `main` 或 `master` 后，GitHub Actions 会自动：
+
+1. 安装依赖
+2. 生成前端知识库索引和贡献统计
+3. 构建 VitePress
+4. 部署 `docs/.vitepress/dist` 到 GitHub Pages
+
+VitePress `base` 会在 GitHub Actions 中自动使用仓库名，例如 `https://user.github.io/repo/` 对应 `/repo/`。
+
 ---
 
 ## 📝 如何撰写内容
@@ -316,8 +378,8 @@ prompts.md 存在？
       "type": "ollama-endpoints",
       "label": "手动指定端点",
       "endpoints": [
-        { "url": "http://192.168.114.51:11434" },
-        { "url": "http://192.168.114.51:11435" }
+        { "url": "https://model-gateway.example.com" },
+        { "url": "https://model-gateway-backup.example.com" }
       ],
       "model": "qwen2.5:7b"
     }
@@ -550,7 +612,7 @@ POST /api/provider-pool/import
       "type": "ollama-endpoints",
       "label": "手动端点",
       "endpoints": [
-        { "url": "http://localhost:11434" }
+        { "url": "https://model-gateway.example.com" }
       ]
     }
   ]
@@ -589,7 +651,7 @@ POST /api/provider-pool/import
 ├── kb-chat.config.json           # 主配置文件
 ├── kb-chat.providers.json        # 大模型提供商配置
 ├── .cache/                       # 索引缓存 & Provider 池缓存
-├── run.sh                        # 一键启动脚本
+├── run.sh                        # 启动 Copyparty + KB Chat + VitePress
 ├── package.json
 └── README.md
 ```

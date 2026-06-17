@@ -4,9 +4,10 @@
     "vitepress": "^2.0.0-alpha.17"
   },
   "scripts": {
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
+    "docs:dev": "npm run contributors:build && vitepress dev docs",
+    "docs:build": "npm run contributors:build && vitepress build docs",
     "docs:preview": "vitepress preview docs",
+    "contributors:build": "node scripts/build-contributors.mjs",
     "kb-chat:init": "node server/kb-chat-server.mjs --init-config",
     "kb-chat:init:force": "node server/kb-chat-server.mjs --init-config --force",
     "kb-chat:server": "node server/kb-chat-server.mjs"

@@ -4,6 +4,8 @@ node_modules/
 # Build output (VitePress)
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+docs/public/kb-client-index.json
+docs/public/contributors.json
 
 # Dev artifacts
 .cache/

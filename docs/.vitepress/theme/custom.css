@@ -47,3 +47,87 @@
   overflow-wrap: anywhere;
   word-break: break-word;
 }
+
+.contrib-page {
+  min-width: 0;
+}
+
+.contrib-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0 28px;
+}
+
+.contrib-metric {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--vp-c-bg-soft);
+}
+
+.contrib-metric-value {
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+
+.contrib-metric-label,
+.contrib-muted {
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+}
+
+.contrib-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.contrib-table-wrap table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.contrib-table-wrap th,
+.contrib-table-wrap td {
+  white-space: nowrap;
+}
+
+.contrib-recent {
+  display: grid;
+  gap: 8px;
+}
+
+.contrib-commit {
+  display: grid;
+  grid-template-columns: 76px 90px minmax(90px, 140px) minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  padding: 10px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background: var(--vp-c-bg-soft);
+}
+
+.contrib-commit span:last-child {
+  overflow-wrap: anywhere;
+}
+
+.contrib-loading,
+.contrib-error {
+  color: var(--vp-c-text-2);
+  padding: 16px 0;
+}
+
+@media (max-width: 720px) {
+  .contrib-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contrib-commit {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

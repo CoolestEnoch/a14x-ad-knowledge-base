@@ -63,7 +63,7 @@
           v-model="input"
           class="kb-chat-input"
           rows="2"
-          :placeholder="kbReady ? '问一下知识库...' : '知识库索引中...'"
+          :placeholder="kbReady ? '问一下知识库...' : '前端知识库索引未就绪...'"
           :disabled="!kbReady"
           @keydown.enter.exact.prevent="sendMessage"
         />
@@ -84,7 +84,6 @@ const loading = ref(false);
 const statusText = ref('连接中...');
 const kbReady = ref(false);
 const bodyRef = ref(null);
-let statusTimer = null;
 
 const messages = ref([
   {
@@ -191,7 +190,7 @@ function typesetChat() {
 // 监听消息变化，自动渲染数学公式
 watch(() => messages.value.length, typesetChat);
 
-// ── API 调用 ──────────────────────────────────────
+// ── 后端 API 调用 ──────────────────────────────────────
 
 async function requestJson(url, options = {}) {
   const res = await fetch(url, options);
@@ -216,7 +215,7 @@ async function requestJson(url, options = {}) {
   return data;
 }
 
-async function fetchStatus() {
+async function loadClientData() {
   try {
     const data = await requestJson('/api/status');
 
@@ -236,9 +235,9 @@ async function fetchStatus() {
       kbReady.value = false;
       statusText.value = '后端状态异常';
     }
-  } catch {
+  } catch (err) {
     kbReady.value = false;
-    statusText.value = '后端未连接';
+    statusText.value = `后端未连接：${err?.message || String(err)}`;
   }
 }
 
@@ -277,18 +276,12 @@ async function sendMessage() {
 
     const data = await requestJson('/api/chat', {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         message: text,
         history,
       }),
     });
-
-    if (!data.ok) {
-      throw new Error(data.error || '请求失败');
-    }
 
     messages.value.push({
       role: 'assistant',
@@ -296,7 +289,7 @@ async function sendMessage() {
       sources: data.sources || [],
     });
 
-    await fetchStatus();
+    await loadClientData();
   } catch (err) {
     messages.value.push({
       role: 'assistant',
@@ -310,14 +303,10 @@ async function sendMessage() {
 }
 
 onMounted(() => {
-  fetchStatus();
-  statusTimer = window.setInterval(fetchStatus, 2000);
+  loadClientData();
 });
 
 onUnmounted(() => {
-  if (statusTimer) {
-    window.clearInterval(statusTimer);
-  }
 });
 </script>
 

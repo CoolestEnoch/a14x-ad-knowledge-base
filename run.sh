@@ -6,6 +6,7 @@ DOCS_DIR="$ROOT_DIR/docs"
 UPDATE_SCRIPT="$DOCS_DIR/update.sh"
 COPYPARTY_SCRIPT="$DOCS_DIR/copyparty-sfx.py"
 CHAT_SERVER_SCRIPT="$ROOT_DIR/server/kb-chat-server.mjs"
+UPLOAD_HOOK_SCRIPT="$ROOT_DIR/scripts/record-copyparty-upload.mjs"
 
 VITEPRESS_HOST=""
 VITEPRESS_PORT=""
@@ -13,6 +14,7 @@ COPYPARTY_HOST=""
 COPYPARTY_PORT=""
 COPYPARTY_USER=""
 COPYPARTY_PASS=""
+COPYPARTY_ACCOUNTS_JSON=""
 KB_CHAT_HOST=""
 KB_CHAT_PORT=""
 KB_DIR=""
@@ -100,6 +102,7 @@ const lines = [
   shellString('COPYPARTY_PORT', requiredPort(cfg.copyparty?.port, 'copyparty.port')),
   shellString('COPYPARTY_USER', cfg.copyparty?.user || ''),
   shellString('COPYPARTY_PASS', cfg.copyparty?.pass || ''),
+  shellString('COPYPARTY_ACCOUNTS_JSON', JSON.stringify(cfg.copyparty?.accounts || cfg.copyparty?.users || [])),
 ];
 
 console.log(lines.join('\n'));
@@ -137,6 +140,10 @@ check_env() {
         echo "[ERROR] chat server 不存在：$CHAT_SERVER_SCRIPT"
         exit 1
     fi
+    if [ ! -f "$UPLOAD_HOOK_SCRIPT" ]; then
+        echo "[ERROR] upload hook 不存在：$UPLOAD_HOOK_SCRIPT"
+        exit 1
+    fi
 }
 
 # ── update.sh ──────────────────────────────────────
@@ -153,25 +160,57 @@ run_update() {
     echo ""
 }
 
+build_frontend_runtime_assets() {
+    echo ""
+    echo "[Frontend] 正在生成贡献统计 ..."
+    cd "$ROOT_DIR"
+    npm run contributors:build
+    echo "[Frontend] 贡献统计生成完成"
+    echo ""
+}
+
 # ── 启动各服务（全部作为子进程，同一进程组）─────────
 
 start_copyparty() {
     local args=("-i" "$COPYPARTY_HOST" "-p" "$COPYPARTY_PORT")
-    if [ -n "$COPYPARTY_USER" ] && [ -n "$COPYPARTY_PASS" ]; then
+    local users_csv=""
+
+    while IFS=$'\t' read -r user pass; do
+        [ -n "$user" ] || continue
+        args+=("-a" "${user}:${pass}")
+        if [ -n "$users_csv" ]; then
+            users_csv="${users_csv},${user}"
+        else
+            users_csv="$user"
+        fi
+    done < <(COPYPARTY_ACCOUNTS_JSON="$COPYPARTY_ACCOUNTS_JSON" node - <<'NODE'
+const accounts = JSON.parse(process.env.COPYPARTY_ACCOUNTS_JSON || '[]');
+const normalized = Array.isArray(accounts)
+  ? accounts
+  : Object.entries(accounts || {}).map(([user, pass]) => ({ user, pass }));
+
+for (const account of normalized) {
+  const user = String(account.user || account.name || account.username || '').trim();
+  const pass = String(account.pass || account.password || '').trim();
+  if (user && pass) console.log(`${user}\t${pass}`);
+}
+NODE
+)
+
+    if [ -z "$users_csv" ] && [ -n "$COPYPARTY_USER" ] && [ -n "$COPYPARTY_PASS" ]; then
         args+=("-a" "${COPYPARTY_USER}:${COPYPARTY_PASS}")
-        args+=("-v" "${KB_DIR}::rwmd,${COPYPARTY_USER}")
+        users_csv="$COPYPARTY_USER"
+    fi
+
+    if [ -n "$users_csv" ]; then
+        args+=("-v" "${KB_DIR}::rwmd,${users_csv}")
     else
         args+=("-v" "${KB_DIR}::rwmd")
     fi
+    args+=("--hook-v" "--xau" "f,j,node,${UPLOAD_HOOK_SCRIPT}")
     echo "[Copyparty] http://${COPYPARTY_HOST}:${COPYPARTY_PORT}/ -> $KB_DIR"
+    echo "[Copyparty] upload hook: --xau f,j,node,${UPLOAD_HOOK_SCRIPT}"
     python3 "$COPYPARTY_SCRIPT" "${args[@]}" &
-    PIDS+=($!)
-}
-
-start_chat_server() {
-    echo "[KB Chat] 启动后端：http://${KB_CHAT_HOST}:${KB_CHAT_PORT}"
-    cd "$ROOT_DIR"
-    node "$CHAT_SERVER_SCRIPT" &
     PIDS+=($!)
 }
 
@@ -179,6 +218,13 @@ start_vitepress() {
     echo "[VitePress] npx vitepress dev docs --host $VITEPRESS_HOST --port $VITEPRESS_PORT"
     cd "$ROOT_DIR"
     npx vitepress dev docs --host "$VITEPRESS_HOST" --port "$VITEPRESS_PORT" &
+    PIDS+=($!)
+}
+
+start_chat_server() {
+    echo "[KB Chat] node $CHAT_SERVER_SCRIPT -> http://${KB_CHAT_HOST}:${KB_CHAT_PORT}"
+    cd "$ROOT_DIR"
+    node "$CHAT_SERVER_SCRIPT" &
     PIDS+=($!)
 }
 
@@ -212,6 +258,7 @@ main() {
     trap cleanup INT TERM EXIT
 
     run_update
+    build_frontend_runtime_assets
 
     start_copyparty
     start_chat_server

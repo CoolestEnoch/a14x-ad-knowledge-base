@@ -13,7 +13,11 @@
     "port": 10810,
     "publicUrl": "http://127.0.0.1:10810",
     "user": "",
-    "pass": ""
+    "pass": "",
+    "accounts": [
+      { "user": "alice", "pass": "change-me" },
+      { "user": "bob", "pass": "change-me" }
+    ]
   },
   "kb": {
     "dir": "docs/kb",

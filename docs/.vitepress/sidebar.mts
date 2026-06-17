@@ -779,6 +779,7 @@ export default [
         collapsed: true,
         items: [
           { text: 'CVPR2026', link: '/kb/CVPR2026' },
+          { text: 'siri_prompt', link: '/kb/siri_prompt' },
         ],
       },
 ]

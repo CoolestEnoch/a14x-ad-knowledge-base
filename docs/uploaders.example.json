@@ -1,0 +1,17 @@
+{
+  "files": {
+    "自动驾驶入门/index.md": {
+      "uploader": "alice"
+    }
+  },
+  "rules": [
+    {
+      "pathPrefix": "现有工作/",
+      "uploader": "bob"
+    },
+    {
+      "glob": "学习笔记/**/*.md",
+      "uploader": "carol"
+    }
+  ]
+}

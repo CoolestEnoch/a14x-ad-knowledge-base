@@ -8,7 +8,7 @@ function loadKbChatConfig() {
     const configPath = path.resolve(process.cwd(), 'kb-chat.config.json')
     return JSON.parse(fs.readFileSync(configPath, 'utf8'))
   } catch (error) {
-    throw new Error(`failed to load kb-chat.config.json: ${String((error as Error)?.message || error)}`)
+    return {}
   }
 }
 
@@ -30,18 +30,25 @@ function requiredString(value: unknown, name: string) {
 }
 
 const kbChatConfig = loadKbChatConfig()
-const kbChatHost = requiredString(kbChatConfig?.chatServer?.host, 'chatServer.host')
-const kbChatProxyHost = requiredString(kbChatConfig?.chatServer?.proxyHost || kbChatHost, 'chatServer.proxyHost')
-const kbChatPort = requiredPort(kbChatConfig?.chatServer?.port, 'chatServer.port')
-const vitepressHost = requiredString(kbChatConfig?.vitepress?.host, 'vitepress.host')
-const vitepressPort = requiredPort(kbChatConfig?.vitepress?.port, 'vitepress.port')
-const copypartyPort = requiredPort(kbChatConfig?.copyparty?.port, 'copyparty.port')
-const copypartyPublicUrl = String(kbChatConfig?.copyparty?.publicUrl || `http://${kbChatConfig?.copyparty?.host}:${copypartyPort}`)
+const kbChatHost = String(kbChatConfig?.chatServer?.host || '127.0.0.1')
+const kbChatProxyHost = String(kbChatConfig?.chatServer?.proxyHost || kbChatHost)
+const kbChatPort = Number(kbChatConfig?.chatServer?.port || 1145)
+const vitepressHost = String(kbChatConfig?.vitepress?.host || '0.0.0.0')
+const vitepressPort = Number(kbChatConfig?.vitepress?.port || 1919)
+const copypartyPort = Number(kbChatConfig?.copyparty?.port || 10810)
+const copypartyHost = String(kbChatConfig?.copyparty?.host || '127.0.0.1')
+const copypartyPublicUrl = String(kbChatConfig?.copyparty?.publicUrl || `http://${copypartyHost}:${copypartyPort}`)
+const githubRepository = String(process.env.GITHUB_REPOSITORY || '')
+const repositoryName = githubRepository.split('/')[1] || ''
+const siteBase = process.env.VITEPRESS_BASE || (process.env.GITHUB_ACTIONS && repositoryName ? `/${repositoryName}/` : '/')
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "车路知识库",
   description: "车路知识库",
+  #base: siteBase,
+  base: '/ai4x-abkb/',
+  ignoreDeadLinks: true,
   // 客户端 MathJax 渲染数学公式（服务端不渲染 SVG，避免大文件崩溃）
   head: [
     ['script', {}, `MathJax={tex:{inlineMath:[['$','$'],['\\\\(','\\\\)']],displayMath:[['$$','$$'],['\\\\[','\\\\]']]},options:{ignoreHtmlClass:'no-mathjax',processHtmlClass:'math'},startup:{ready(){MathJax.startup.defaultReady();}}}`],
@@ -130,6 +137,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
+      { text: '贡献统计', link: '/contributors' },
       { text: '编辑', link: copypartyPublicUrl }
     ],
 
